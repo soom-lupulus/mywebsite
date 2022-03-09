@@ -1,0 +1,70 @@
+@font-color: hsla(0, 0%, 88.2%, 0.8);
+@lyrics-color: #31c27c;
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  background-color: rgb(22, 52, 54);
+  display: flex;
+  .content {
+    width: 90%;
+    height: 80%;
+    margin: auto;
+    display: flex;
+    .tableContainer {
+      width: 60%;
+      height: 80%;
+      &::-webkit-scrollbar-thumb{
+        background-color: rgba(0,0,0,.1);
+        border-radius: 5px;
+      }
+      &::-webkit-scrollbar-track{
+        background-color: transparent;
+      }
+      .cell {
+        color: @font-color;
+      }
+    }
+    .info{
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      // justify-content: center;
+      color: @font-color;
+      text-align: center;
+      font-size: large;
+      .songInfo{
+        .cover{
+          img{
+            width: 250px;
+          }
+        }
+        .description{
+          div{
+            padding: 5px 0;
+          }
+        }
+      }
+      .lyrics{
+        color: @lyrics-color;
+        .lrc{
+          margin: 0 auto;
+          width: 60%;
+          height: 200px;
+          // background-color: #fff;
+          margin-top: 20px;
+          overflow: hidden;
+        }
+      }
+    }
+    .firstCell{
+      display: flex;
+      div{
+        flex: 1;
+        .playIcon{
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

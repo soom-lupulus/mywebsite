@@ -1,0 +1,32 @@
+@font: 20px;
+@bg: #000000;
+@h: 60px;
+
+.wrapper{
+  font-size: @font;
+  background-color: @bg;
+  color: #fff;
+  display: flex;
+  height: @h;
+  padding: 0 0 0 80px;
+  position: sticky;
+  top: 0;
+  .left{
+    flex-basis: 50%;
+    line-height: @h;
+  }
+  .right{
+    display: flex;
+    li{
+      line-height: @h;
+      margin: 0 20px;
+      cursor: pointer;
+    }
+    .user{
+      span{
+        margin: 0 5px;
+        font-size: 15px;
+      }
+    }
+  }
+}

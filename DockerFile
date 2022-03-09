@@ -1,0 +1,19 @@
+# node解释器
+FROM node:latest as builder
+# 声明工作目录
+WORKDIR /website
+# 拷贝整个前端项目到当前工作目录
+COPY . .
+# 安装依赖
+RUN npm install
+# 打包
+RUN npm run build
+
+FROM nginx:alpine
+LABEL MAINTAINER = "hope392163@163.com"
+
+# 暴露8000端口
+EXPOSE 8000
+
+# 复制打包好的文件到nginx的www目录下
+COPY --from=build /website/dist /usr/share/nginx/html
