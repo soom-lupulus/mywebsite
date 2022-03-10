@@ -17,7 +17,7 @@ const Home = () => {
       <div className={cx.wrapper}>
         <ul>
           <li>
-            <span>如果学习都是用时间来换经验，那么努力的目的到底是什么，我服了啊啊啊啊????/span>
+            <span>如果学习都是用时间来换经验，那么努力的目的到底是什么66666????</span>
           </li>
           <li>
             <span>Keep going, and thinking why</span>
