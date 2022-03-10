@@ -9,13 +9,15 @@
  */
 import cx from './index.less'
 
+console.log(process.env.envType);
+
 const Home = () => {
   return (
     <>
       <div className={cx.wrapper}>
         <ul>
           <li>
-            <span>如果学习都是用时间来换经验，那么努力的目的到底是什么?</span>
+            <span>如果学习都是用时间来换经验，那么努力的目的到底是什么????</span>
           </li>
           <li>
             <span>Keep going, and thinking why</span>
