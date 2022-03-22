@@ -16,6 +16,9 @@ import cx from './index.less'
 import TheAudio from '@/components/TheAudio'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import request from '@/service/index'
+import { ReactComponent as Back } from '@/assets/svg/back.svg'
+import { useHistory } from "react-router";
+import { message } from "antd";
 
 
 type songModel = {
@@ -30,11 +33,19 @@ type songModel = {
   name: string,
 }
 
+type lyricModel = {
+  stop: () => void,
+  play: () => void,
+  toggleState: () => void,
+}
+
 const Song: React.FC = ({ }) => {
+  const history = useHistory()
   const { uuid: albumId } = useParams();
+  const { } = useHistory
   const [songList, setSongList] = useState<songModel[]>([]);
   const [currentSong, setCurrentSong] = useState<songModel>({});
-  const [isPause, setIsPause] = useState(false);
+  const [isPause, setIsPause] = useState(true);
   const [curText, setCurText] = useState('');
   const [curLrc, setCurLrc] = useState('');
 
@@ -48,44 +59,56 @@ const Song: React.FC = ({ }) => {
   }, [albumId])
 
   // 获取歌词详情
+  let lyric: lyricModel
   const getlyrics = useCallback((uuid) => {
+    lyric?.stop()
     request.get(`/music/lyrics/${uuid}`).then(res => {
       const lrc = res.data
+       lyric = new Lyric(lrc, ({ txt, lineNum }: { txt: string, lineNum: number }) => {
+        console.log(txt);
+
+        setCurText(txt)
+      })
+      lyric.play()
+
       setCurLrc(lrc);
 
     }).catch(err => {
-
+      return message.error(err)
     })
   }, [])
 
-
-  // 处理歌词
-
   // 播放当前歌曲
-  const playCurSong = useCallback((row) => {
+  const playCurSong = useCallback(async (row) => {
     setCurrentSong(row);
-    const lyric = new Lyric(curLrc, ({ txt, lineNum }: { txt: string, lineNum: number }) => {
-      setCurText(txt)
-    })
-    lyric.play()
+    setCurLrc('')
+    const { lrc_source, uuid } = row
+    if (lrc_source) {
+      console.log('拿歌词了');
+      getlyrics(uuid)
+    }else{
+      message.info('暂无歌词')
+    }
+
+    setIsPause(false)
   }, [])
 
   useEffect(() => {
     getAlbumList()
   }, [])
 
-  useEffect(() => {
-    const { lrc_source, uuid } = currentSong
-    if (lrc_source) {
-      getlyrics(uuid)
-    }
-
-  }, [currentSong])
 
   return (
     <>
       {/* <AccessAlarm></AccessAlarm> */}
       <div className={cx.wrapper}>
+        <nav>
+          <Back
+            className={cx.back}
+            onClick={() => {
+              history.goBack()
+            }}></Back>
+        </nav>
         <div className={cx.content}>
           <TableContainer className={cx.tableContainer}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -155,7 +178,22 @@ const Song: React.FC = ({ }) => {
           </div>
         </div>
       </div>
-      <TheAudio source={currentSong?.source} isPause={isPause} />
+      <footer>
+        <TheAudio
+          source={currentSong?.source}
+          songName={currentSong.name}
+          isPause={isPause}
+          setIsPause={setIsPause}
+          onWaiting={() => {
+            console.log('啊哦，卡了');
+            lyric?.toggleState()
+          }}
+          onPlaying={() => {
+            console.log('OK,给爷冲');
+            lyric?.toggleState()
+          }}
+        />
+      </footer>
     </>
   )
 }
