@@ -9,7 +9,7 @@ import classNames from 'classnames'
 type AudioProps = {
   className?: string,
   songName?: string,
-  source: string,
+  source?: string,
   isPause: boolean,
   setIsPause: (flag: boolean) => void
 } & React.AudioHTMLAttributes<HTMLAudioElement>

@@ -44,7 +44,7 @@ const Song: React.FC = ({ }) => {
   const { uuid: albumId } = useParams();
   const { } = useHistory
   const [songList, setSongList] = useState<songModel[]>([]);
-  const [currentSong, setCurrentSong] = useState<songModel>({});
+  const [currentSong, setCurrentSong] = useState<songModel>();
   const [isPause, setIsPause] = useState(true);
   const [curText, setCurText] = useState('');
   const [curLrc, setCurLrc] = useState('');
@@ -64,7 +64,7 @@ const Song: React.FC = ({ }) => {
     lyric?.stop()
     request.get(`/music/lyrics/${uuid}`).then(res => {
       const lrc = res.data
-       lyric = new Lyric(lrc, ({ txt, lineNum }: { txt: string, lineNum: number }) => {
+      lyric = new Lyric(lrc, ({ txt, lineNum }: { txt: string, lineNum: number }) => {
         console.log(txt);
 
         setCurText(txt)
@@ -86,7 +86,7 @@ const Song: React.FC = ({ }) => {
     if (lrc_source) {
       console.log('拿歌词了');
       getlyrics(uuid)
-    }else{
+    } else {
       message.info('暂无歌词')
     }
 
@@ -149,20 +149,20 @@ const Song: React.FC = ({ }) => {
           <div className={cx.info}>
             <div className={cx.songInfo}>
               <div className={cx.cover}>
-                <img src={currentSong.cover} alt="" />
+                <img src={currentSong?.cover} alt="" />
               </div>
               <div className={cx.description}>
                 <div>
                   <span>歌曲名：</span>
-                  <span>{currentSong.name}</span>
+                  <span>{currentSong?.name}</span>
                 </div>
                 <div>
                   <span>歌手：</span>
-                  <span>{currentSong.artist}</span>
+                  <span>{currentSong?.artist}</span>
                 </div>
                 <div>
                   <span>专辑：</span>
-                  <span>{currentSong.album_name}</span>
+                  <span>{currentSong?.album_name}</span>
                 </div>
               </div>
             </div>
@@ -181,7 +181,7 @@ const Song: React.FC = ({ }) => {
       <footer>
         <TheAudio
           source={currentSong?.source}
-          songName={currentSong.name}
+          songName={currentSong?.name}
           isPause={isPause}
           setIsPause={setIsPause}
           onWaiting={() => {
