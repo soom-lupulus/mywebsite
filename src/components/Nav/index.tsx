@@ -99,7 +99,7 @@ const Nav = () => {
           <li>个人文章</li>
           <li>前端资源</li>
           <li>留言板</li>
-          <li>游戏</li>
+          <li>诗词</li>
           <li onClick={() => goWhere('/album')}>音乐</li>
           <li>工具</li>
           {token ? <li>欢迎你， {userInfo?.userName}</li> :
