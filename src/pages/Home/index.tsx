@@ -9,6 +9,8 @@
  */
 import cx from './index.less'
 
+console.log(process.env.envType);
+
 const Home = () => {
   return (
     <>
