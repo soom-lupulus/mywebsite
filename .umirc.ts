@@ -14,10 +14,20 @@ export default defineConfig({
     type: 'none',
   },
   routes: [
-    { path: '/', component: '@/pages/index' },
+    { path: '/', component: '@/pages/index', title: '勒勒苠' },
     { path: '/message', component: '@/pages/Message' },
-    { path: '/album', component: '@/pages/Music' },
-    { path: '/album/:uuid', component: '@/pages/Music/Song' },
+    {
+      path: '/album',
+      component: '@/pages/Music',
+      title: '荔枝音乐',
+      access: 'canListen',
+    },
+    {
+      path: '/album/:uuid',
+      component: '@/pages/Music/Song',
+      title: '荔枝音乐',
+    },
+    { component: '@/pages/404' },
   ],
   fastRefresh: {},
   proxy: {
@@ -26,4 +36,5 @@ export default defineConfig({
       changeOrigin: true,
     },
   },
+  mfsu: {},
 });

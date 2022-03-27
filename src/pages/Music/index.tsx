@@ -7,44 +7,49 @@
  * @FilePath: \website\src\pages\Music\index.tsx
  * 代码都是复制过来的，怎么会出错
  */
-import { useEffect, useState, useCallback, useMemo } from "react"
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { history } from 'umi';
-import request from '@/service/index'
-import cx from './index.less'
-// Import Swiper React components
-import { Swiper, SwiperSlide } from 'swiper/react/swiper-react';
-// Import Swiper styles
+import request from '@/service/index';
+import cx from './index.less';
+import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/swiper.less';
+import { useAccess } from 'umi';
 
 type albumModel = {
-  cover: string,
-  description: string,
-  name: string,
-  uuid: number,
-}
+  cover: string;
+  description: string;
+  name: string;
+  uuid: number;
+};
 
 const Music: React.FC = () => {
-  const [albumList, setAlbumList] = useState<albumModel[]>([])
+  const access = useAccess();
+  const [albumList, setAlbumList] = useState<albumModel[]>([]);
   const groupArr = useMemo(() => {
-    let newArr = [], num = 5
-    const total = Math.ceil(albumList.length / num)
+    let newArr = [],
+      num = 5;
+    const total = Math.ceil(albumList.length / num);
     for (let i = 0; i < total; i++) {
-      const a = albumList.slice(i * num, (i + 1) * num)
-      newArr.push(a)
+      const a = albumList.slice(i * num, (i + 1) * num);
+      newArr.push(a);
     }
-    return newArr
-  }, [albumList])
+    return newArr;
+  }, [albumList]);
   const albumClick = useCallback((item) => {
-    history.push(`/album/${item}`)
-
-  }, [])
+    history.push(`/album/${item}`);
+  }, []);
   useEffect(() => {
-    request.get('/album/list').then(res => {
-      setAlbumList(res.data)
-    }).catch(err => {
-
-    })
-  }, [])
+    if (!access.canListen) {
+      history.replace('/');
+    } else {
+      request
+        .get('/album/list')
+        .then((res) => {
+          setAlbumList(res.data);
+        })
+        .catch((err) => {});
+    }
+  }, []);
 
   return (
     <>
@@ -56,28 +61,27 @@ const Music: React.FC = () => {
           onSlideChange={() => console.log('slide change')}
           onSwiper={(swiper) => console.log(swiper)}
         >
-          {
-            groupArr.map(item => {
-              return (
-                <SwiperSlide className={cx.slide}>
-                  <div className={cx['slide-item']}>
-                    {
-                      item.map(item => {
-                        return (
-
-                          <div className={cx['album-item']}>
-                            <div className="img" onClick={() => albumClick(item.uuid)}><img src={item.cover} alt="" /></div>
-                            <div className="des">{item.name}</div>
-                          </div>
-
-                        )
-                      })
-                    }
-                  </div>
-                </SwiperSlide>
-              )
-            })
-          }
+          {groupArr.map((item) => {
+            return (
+              <SwiperSlide className={cx.slide}>
+                <div className={cx['slide-item']}>
+                  {item.map((item) => {
+                    return (
+                      <div className={cx['album-item']}>
+                        <div
+                          className="img"
+                          onClick={() => albumClick(item.uuid)}
+                        >
+                          <img src={item.cover} alt="" />
+                        </div>
+                        <div className="des">{item.name}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
       </div>
 
@@ -94,7 +98,7 @@ const Music: React.FC = () => {
         }
       </div> */}
     </>
-  )
-}
+  );
+};
 
-export default Music
+export default Music;

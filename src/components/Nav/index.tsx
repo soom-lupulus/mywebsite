@@ -7,11 +7,11 @@
  * @FilePath: \website\src\components\Nav\index.tsx
  * 代码都是复制过来的，怎么会出错
  */
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { history } from 'umi';
-import cx from './index.less'
-import { ReactComponent as WechatIcon } from '@/assets/svg/wechat-fill.svg'
-import { useForm, SubmitHandler } from "react-hook-form";
+import cx from './index.less';
+import { ReactComponent as WechatIcon } from '@/assets/svg/wechat-fill.svg';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import {
   Box,
   Dialog,
@@ -20,11 +20,10 @@ import {
   DialogContentText,
   TextField,
   Button,
-  DialogActions
+  DialogActions,
 } from '@mui/material';
-import request from '@/service/index'
+import request from '@/service/index';
 import { message } from 'antd';
-
 
 interface IFormInput {
   userName: String;
@@ -32,68 +31,77 @@ interface IFormInput {
 }
 
 type userProps = {
-  uuid: string,
-  userName: string,
-  nickName: string,
-  combination: string,
-  email: string,
-  description?: string,
-  sex: number,
-}
+  uuid: string;
+  userName: string;
+  nickName: string;
+  combination: string;
+  email: string;
+  description?: string;
+  sex: number;
+};
 
 const Nav = () => {
   // 身份验证
-  const [token, setToken] = useState('')
+  const [token, setToken] = useState('');
   // 是否更新token
-  const [tokenNeedUpdate, setTokenNeedUpdate] = useState(true)
+  const [tokenNeedUpdate, setTokenNeedUpdate] = useState(true);
   // 用户信息
   const [userInfo, setUserInfo] = useState<userProps>();
-  const { register, handleSubmit, formState: { errors }, } = useForm<IFormInput>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>();
   // modal显示
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   const goWhere = useCallback((address: string): void => {
-    history.push(address)
-  }, [])
+    history.push(address);
+  }, []);
   const goLogin = useCallback(() => {
-    setOpen(true)
-
-  }, [])
+    setOpen(true);
+  }, []);
   // 关闭登录框
   const handleClose = useCallback(() => {
-    setOpen(false)
-  }, [])
+    setOpen(false);
+  }, []);
   // 提交表单
-  const onSubmit: SubmitHandler<IFormInput> = data => {
-    request.post('/user/login', {
-      data,
-    }).then(res => {
-      if (res.code !== 200) {
-        message.error(res.message)
-      } else {
-        setUserInfo(res.data)
-        message.success(res.message)
-        setOpen(false)
-        setTokenNeedUpdate(true)
-      }
-    })
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    request
+      .post('/user/login', {
+        data,
+      })
+      .then((res) => {
+        if (res.code !== 200) {
+          message.error(res.message);
+        } else {
+          localStorage.setItem('info', JSON.stringify(res.data));
+          message.success(res.message);
+          setOpen(false);
+          setTokenNeedUpdate(true);
+        }
+      });
   };
+
+  const userName = useMemo(() => {
+    const obj = JSON.parse(localStorage.getItem('info')!);
+    return obj?.userName;
+  }, [token]);
 
   useEffect(() => {
     if (tokenNeedUpdate) {
-      const mytoken = localStorage.getItem('token')
+      const mytoken = localStorage.getItem('token');
       if (mytoken) {
-        setToken(mytoken)
+        setToken(mytoken);
       }
-      setTokenNeedUpdate(false)
+      setTokenNeedUpdate(false);
     }
-
-  }, [tokenNeedUpdate])
+  }, [tokenNeedUpdate]);
   return (
     <>
       <div className={cx.wrapper}>
         <div className={cx.left}>
-          <span >愫暮的博客</span>
+          <span>愫暮的博客</span>
         </div>
         <ul className={cx.right}>
           <li>个人文章</li>
@@ -102,11 +110,14 @@ const Nav = () => {
           <li>诗词</li>
           <li onClick={() => goWhere('/album')}>音乐</li>
           <li>工具</li>
-          {token ? <li>欢迎你， {userInfo?.userName}</li> :
+          {token ? (
+            <li>欢迎你， {userName}</li>
+          ) : (
             <li className={cx.user}>
               <span onClick={() => setOpen(true)}>登录</span>
               <span>注册</span>
-            </li>}
+            </li>
+          )}
         </ul>
       </div>
       <Dialog open={open} onClose={handleClose}>
@@ -122,7 +133,7 @@ const Nav = () => {
               type="text"
               fullWidth
               variant="standard"
-              {...register("userName", { required: true })}
+              {...register('userName', { required: true })}
             />
             {errors.userName && <p>userName is required.</p>}
           </DialogContent>
@@ -136,7 +147,7 @@ const Nav = () => {
               type="password"
               fullWidth
               variant="standard"
-              {...register("combination", { required: true })}
+              {...register('combination', { required: true })}
             />
             {errors.combination && <p>combination is required.</p>}
           </DialogContent>
@@ -145,10 +156,9 @@ const Nav = () => {
             <Button type="submit">登录</Button>
           </DialogActions>
         </form>
-
       </Dialog>
     </>
-  )
-}
+  );
+};
 
-export default Nav
+export default Nav;

@@ -7,3 +7,5 @@ export const request: RequestConfig = {
   requestInterceptors: [],
   responseInterceptors: [],
 };
+
+export const getInitialState = () => {};

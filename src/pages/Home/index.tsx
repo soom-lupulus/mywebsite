@@ -7,7 +7,7 @@
  * @FilePath: \website\src\pages\Home\index.tsx
  * 代码都是复制过来的，怎么会出错
  */
-import cx from './index.less'
+import cx from './index.less';
 
 console.log(process.env.envType);
 
@@ -17,7 +17,7 @@ const Home = () => {
       <div className={cx.wrapper}>
         <ul>
           <li>
-            <span>如果学习都是用时间来换经验，那么努力的目的到底是什么ne?</span>
+            <span>如果学习都是用时间来换经验，那么努力的目的到底是什么?</span>
           </li>
           <li>
             <span>Keep going, and thinking why</span>
@@ -28,7 +28,7 @@ const Home = () => {
       <div></div>
       <div></div>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
