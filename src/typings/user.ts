@@ -1,4 +1,4 @@
-export namespace UserModel {
+export namespace UserType {
   export type userProps = {
     uuid: string;
     userName: string;

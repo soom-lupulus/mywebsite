@@ -21,14 +21,16 @@
   },
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
-    "@emotion/react": "^11.7.1",
-    "@emotion/styled": "^11.6.0",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
     "@material-ui/styles": "^4.11.4",
     "@mui/icons-material": "^5.2.5",
-    "@mui/material": "^5.2.8",
+    "@mui/material": "^5.6.2",
     "classnames": "^2.3.1",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.0",
+    "formik": "^2.2.9",
+    "formik-mui": "^4.0.0-alpha.3",
     "lyric-parser": "^1.0.1",
     "normalize.css": "^8.0.1",
     "react": "17.x",
@@ -37,7 +39,8 @@
     "react-router-dom": "^6.2.1",
     "swiper": "^6.8.4",
     "umi": "^3.5.20",
-    "umi-request": "^1.4.0"
+    "umi-request": "^1.4.0",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@reduxjs/toolkit": "^1.8.1",

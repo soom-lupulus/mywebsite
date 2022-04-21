@@ -8,7 +8,7 @@
  * 代码都是复制过来的，怎么会出错
  */
 import { useCallback, useState, useEffect, useMemo } from 'react';
-import { history } from 'umi';
+import { history, connect } from 'umi';
 import cx from './index.less';
 import { ReactComponent as WechatIcon } from '@/assets/svg/wechat-fill.svg';
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -18,31 +18,41 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  TextField,
   Button,
   DialogActions,
+  LinearProgress,
 } from '@mui/material';
+import { Formik, Form, Field } from 'formik';
+import { TextField } from 'formik-mui';
 import request from '@/service/index';
 import { message } from 'antd';
-import type { UserModel } from '@/typings/user';
+import type { UserType } from '@/typings/user';
+import { object, string, number, date, InferType } from 'yup';
+import { UserModelState, UserModelType } from '@/models/user';
 
 interface IFormInput {
   userName: String;
   combination: String;
 }
 
-const Nav = () => {
+const userSchema = object({
+  userName: string().required(),
+  combination: string().required(),
+});
+
+const Nav: React.FC<{ userDvaState: UserModelState; dispatch: any }> = ({
+  userDvaState,
+  dispatch,
+}) => {
+  console.log(userDvaState);
+  const { userInfo } = userDvaState;
+
   // 身份验证
   const [token, setToken] = useState('');
   // 是否更新token
   const [tokenNeedUpdate, setTokenNeedUpdate] = useState(true);
   // 用户信息
-  const [userInfo, setUserInfo] = useState<UserModel.userProps>();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IFormInput>();
+  // const [userInfo, setUserInfo] = useState<UserType.userProps>();
   // modal显示
   const [open, setOpen] = useState(false);
 
@@ -56,28 +66,6 @@ const Nav = () => {
   const handleClose = useCallback(() => {
     setOpen(false);
   }, []);
-  // 提交表单
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    request
-      .post('/user/login', {
-        data,
-      })
-      .then((res) => {
-        if (res.code !== 200) {
-          message.error(res.message);
-        } else {
-          localStorage.setItem('info', JSON.stringify(res.data));
-          message.success(res.message);
-          setOpen(false);
-          setTokenNeedUpdate(true);
-        }
-      });
-  };
-
-  const userName = useMemo(() => {
-    const obj = JSON.parse(localStorage.getItem('info')!);
-    return obj?.userName;
-  }, [token]);
 
   useEffect(() => {
     if (tokenNeedUpdate) {
@@ -108,7 +96,12 @@ const Nav = () => {
           <li onClick={() => goWhere('/album')}>音乐</li>
           <li>工具</li>
           {token ? (
-            <li>欢迎你， {userName}</li>
+            <li>
+              欢迎你，{' '}
+              {userInfo.userName
+                ? userInfo.userName
+                : JSON.parse(sessionStorage.getItem('userInfo')!)['userName']}
+            </li>
           ) : (
             <li className={cx.user}>
               <span onClick={() => setOpen(true)}>登录</span>
@@ -117,45 +110,79 @@ const Nav = () => {
           )}
         </ul>
       </div>
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={open} onClose={handleClose} className={cx.dialog1}>
         <DialogTitle>LogIn</DialogTitle>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent>
-            <TextField
-              autoFocus
-              required
-              margin="dense"
-              id="username"
-              label="Username"
-              type="text"
-              fullWidth
-              variant="standard"
-              {...register('userName', { required: true })}
-            />
-            {errors.userName && <p>userName is required.</p>}
-          </DialogContent>
-          <DialogContent>
-            <TextField
-              autoFocus
-              required
-              margin="dense"
-              id="combination"
-              label="Password"
-              type="password"
-              fullWidth
-              variant="standard"
-              {...register('combination', { required: true })}
-            />
-            {errors.combination && <p>combination is required.</p>}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>取消</Button>
-            <Button type="submit">登录</Button>
-          </DialogActions>
-        </form>
+        <Formik
+          initialValues={{
+            userName: '',
+            combination: '',
+          }}
+          validationSchema={userSchema}
+          onSubmit={async (values, { setSubmitting }) => {
+            dispatch({
+              type: 'userDvaState/grabUserInfo',
+              payload: values,
+            }).then(
+              (res: UserModelState) => {
+                console.log(res);
+
+                setSubmitting(false);
+                message.success('登陆成功');
+                setOpen(false);
+                setTokenNeedUpdate(true);
+                // 存入sessionStorage持久化用户信息
+                sessionStorage.setItem('userInfo', JSON.stringify(res));
+              },
+              (err: any) => {
+                message.error(err);
+              },
+            );
+          }}
+        >
+          {({ submitForm, isSubmitting }) => (
+            <Form className={cx.form}>
+              <Field
+                component={TextField}
+                name="userName"
+                type="text"
+                label="用户名"
+              />
+              <br />
+              <Field
+                component={TextField}
+                type="password"
+                label="密码"
+                name="combination"
+              />
+              {isSubmitting && <LinearProgress />}
+              <br />
+              <div>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  onClick={submitForm}
+                >
+                  登录
+                </Button>
+                <Button onClick={handleClose}>取消</Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </Dialog>
     </>
   );
 };
 
-export default Nav;
+const mapStateToProps = ({
+  userDvaState,
+}: {
+  userDvaState: UserModelState;
+}) => {
+  return {
+    userDvaState,
+  };
+};
+
+export default connect(mapStateToProps)(Nav);
