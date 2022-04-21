@@ -14,7 +14,7 @@ export default defineConfig({
     type: 'none',
   },
   routes: [
-    { path: '/', component: '@/pages/index', title: '勒勒苠' },
+    { path: '/', component: '@/pages/Home', title: '勒勒苠' },
     { path: '/message', component: '@/pages/Message' },
     {
       path: '/album',
@@ -37,4 +37,8 @@ export default defineConfig({
     },
   },
   mfsu: {},
+  dva: {
+    immer: true,
+    hmr: false,
+  },
 });

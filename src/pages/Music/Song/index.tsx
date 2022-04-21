@@ -7,96 +7,77 @@
  * @FilePath: \website\src\pages\Music\index.tsx
  * 代码都是复制过来的，怎么会出错
  */
-import { useEffect, useState, useCallback } from "react"
-import { useParams } from 'umi';
-import Lyric from 'lyric-parser'
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, connect } from 'umi';
+import Lyric from 'lyric-parser';
 // import { AccessAlarm, ThreeDRotation } from '@mui/icons-material';
-import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import cx from './index.less'
-import TheAudio from '@/components/TheAudio'
+import {
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import cx from './index.less';
+import TheAudio from '@/components/TheAudio';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import request from '@/service/index'
-import { ReactComponent as Back } from '@/assets/svg/back.svg'
-import { useHistory } from "react-router";
-import { message } from "antd";
+import request from '@/service/index';
+import { ReactComponent as Back } from '@/assets/svg/back.svg';
+import { useHistory } from 'react-router';
+import { message } from 'antd';
+import type { MusicType } from '@/typings/music';
+import { SongModelState, SongModelType } from './model';
 
-
-type songModel = {
-  album_id: number,
-  uuid: number,
-  cover: string,
-  album_name: string,
-  artist: string,
-  lrc_source: string,
-  source: string,
-  description: string,
-  name: string,
-}
-
-type lyricModel = {
-  stop: () => void,
-  play: () => void,
-  toggleState: () => void,
-}
-
-const Song: React.FC = ({ }) => {
-  const history = useHistory()
-  const { uuid: albumId } = useParams();
-  const { } = useHistory
-  const [songList, setSongList] = useState<songModel[]>([]);
-  const [currentSong, setCurrentSong] = useState<songModel>();
+const Song: React.FC<{ songDvaState: SongModelState }> = ({ songDvaState }) => {
+  const { songList } = songDvaState;
+  const history = useHistory();
+  const [currentSong, setCurrentSong] = useState<MusicType.SongProps>();
   const [isPause, setIsPause] = useState(true);
   const [curText, setCurText] = useState('');
   const [curLrc, setCurLrc] = useState('');
 
-  // 获取专辑列表
-  const getAlbumList = useCallback(() => {
-    request.get(`/music/list/${albumId}`).then(res => {
-      setSongList(res.data)
-    }).catch(error => {
-
-    })
-  }, [albumId])
-
   // 获取歌词详情
-  let lyric: lyricModel
+  let lyric: MusicType.lyricProps;
   const getlyrics = useCallback((uuid) => {
-    lyric?.stop()
-    request.get(`/music/lyrics/${uuid}`).then(res => {
-      const lrc = res.data
-      lyric = new Lyric(lrc, ({ txt, lineNum }: { txt: string, lineNum: number }) => {
-        console.log(txt);
+    lyric?.stop();
+    request
+      .get(`/music/lyrics/${uuid}`)
+      .then((res) => {
+        const lrc = res.data;
+        lyric = new Lyric(
+          lrc,
+          ({ txt, lineNum }: { txt: string; lineNum: number }) => {
+            console.log(txt);
 
-        setCurText(txt)
+            setCurText(txt);
+          },
+        );
+        lyric.play();
+
+        setCurLrc(lrc);
       })
-      lyric.play()
-
-      setCurLrc(lrc);
-
-    }).catch(err => {
-      return message.error(err)
-    })
-  }, [])
+      .catch((err) => {
+        return message.error(err);
+      });
+  }, []);
 
   // 播放当前歌曲
   const playCurSong = useCallback(async (row) => {
     setCurrentSong(row);
-    setCurLrc('')
-    const { lrc_source, uuid } = row
+    setCurLrc('');
+    const { lrc_source, uuid } = row;
     if (lrc_source) {
       console.log('拿歌词了');
-      getlyrics(uuid)
+      getlyrics(uuid);
     } else {
-      message.info('暂无歌词')
+      message.info('暂无歌词');
     }
 
-    setIsPause(false)
-  }, [])
-
-  useEffect(() => {
-    getAlbumList()
-  }, [])
-
+    setIsPause(false);
+  }, []);
 
   return (
     <>
@@ -106,8 +87,9 @@ const Song: React.FC = ({ }) => {
           <Back
             className={cx.back}
             onClick={() => {
-              history.goBack()
-            }}></Back>
+              history.goBack();
+            }}
+          ></Back>
         </nav>
         <div className={cx.content}>
           <TableContainer className={cx.tableContainer}>
@@ -126,16 +108,18 @@ const Song: React.FC = ({ }) => {
                     key={row.uuid}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     onMouseOver={() => {
-                      const { source } = row
-
+                      const { source } = row;
                     }}
                   >
-                    <TableCell style={{ minWidth: "70px" }} className={cx.cell}>
+                    <TableCell style={{ minWidth: '70px' }} className={cx.cell}>
                       <div className={cx.firstCell}>
                         <div>{row.name}</div>
                         {/* <div><a onClick={() => playCurSong(row.source)}>播放</a></div> */}
                         <div>
-                          <PlayCircleOutlineIcon className={cx.playIcon} onClick={() => playCurSong(row)} />
+                          <PlayCircleOutlineIcon
+                            className={cx.playIcon}
+                            onClick={() => playCurSong(row)}
+                          />
                         </div>
                       </div>
                     </TableCell>
@@ -168,12 +152,9 @@ const Song: React.FC = ({ }) => {
             </div>
             <div className={cx.lyrics}>
               <div className={cx.lrc}>
-                {
-                  !curLrc && <p>暂无歌词</p>
-                }
+                {!curLrc && <p>暂无歌词</p>}
                 <p>{curText}</p>
               </div>
-
             </div>
           </div>
         </div>
@@ -186,16 +167,26 @@ const Song: React.FC = ({ }) => {
           setIsPause={setIsPause}
           onWaiting={() => {
             console.log('啊哦，卡了');
-            lyric?.toggleState()
+            lyric?.toggleState();
           }}
           onPlaying={() => {
             console.log('OK,给爷冲');
-            lyric?.toggleState()
+            lyric?.toggleState();
           }}
         />
       </footer>
     </>
-  )
-}
+  );
+};
 
-export default Song
+const mapStateToProps = ({
+  songDvaState,
+}: {
+  songDvaState: SongModelState;
+}) => {
+  return {
+    songDvaState,
+  };
+};
+
+export default connect(mapStateToProps)(Song);

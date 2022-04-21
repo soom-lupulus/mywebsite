@@ -24,21 +24,12 @@ import {
 } from '@mui/material';
 import request from '@/service/index';
 import { message } from 'antd';
+import type { UserModel } from '@/typings/user';
 
 interface IFormInput {
   userName: String;
   combination: String;
 }
-
-type userProps = {
-  uuid: string;
-  userName: string;
-  nickName: string;
-  combination: string;
-  email: string;
-  description?: string;
-  sex: number;
-};
 
 const Nav = () => {
   // 身份验证
@@ -46,7 +37,7 @@ const Nav = () => {
   // 是否更新token
   const [tokenNeedUpdate, setTokenNeedUpdate] = useState(true);
   // 用户信息
-  const [userInfo, setUserInfo] = useState<userProps>();
+  const [userInfo, setUserInfo] = useState<UserModel.userProps>();
   const {
     register,
     handleSubmit,
@@ -101,7 +92,13 @@ const Nav = () => {
     <>
       <div className={cx.wrapper}>
         <div className={cx.left}>
-          <span>愫暮的博客</span>
+          <span
+            onClick={() =>
+              (location.href = 'https://www.cnblogs.com/yuyunhao/')
+            }
+          >
+            愫暮的博客
+          </span>
         </div>
         <ul className={cx.right}>
           <li>个人文章</li>

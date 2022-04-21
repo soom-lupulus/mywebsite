@@ -8,12 +8,14 @@
  * 代码都是复制过来的，怎么会出错
  */
 import cx from './index.less';
+import Nav from '@/components/Nav';
 
 console.log(process.env.envType);
 
 const Home = () => {
   return (
     <>
+      <Nav></Nav>
       <div className={cx.wrapper}>
         <ul>
           <li>
