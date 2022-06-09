@@ -15,3 +15,7 @@ body ::-webkit-scrollbar-thumb{
 li{
   list-style: none;
 }
+
+.ant-message{
+  z-index: 2000;
+}

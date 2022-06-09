@@ -19,7 +19,7 @@ const Home = () => {
       <div className={cx.wrapper}>
         <ul>
           <li>
-            <span>如果学习都是用时间来换经验，那么努力的目的到底是什么?</span>
+            <span>知识分子最大的罪恶，就是建造关押自己的思想监狱</span>
           </li>
           <li>
             <span>Keep going, and thinking why</span>
@@ -27,8 +27,6 @@ const Home = () => {
           <li></li>
         </ul>
       </div>
-      <div></div>
-      <div></div>
     </>
   );
 };

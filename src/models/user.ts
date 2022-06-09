@@ -9,7 +9,7 @@ export interface UserModelState {
 export interface UserModelType {
   namespace: 'userDvaState';
   state: {
-    userInfo: UserModelState;
+    userInfo: UserModelState | {};
   };
   reducers: {
     saveUserInfo: ImmerReducer;
@@ -40,7 +40,7 @@ const UserModel: UserModelType = {
         type: 'saveUserInfo',
         payload: res?.data || {},
       });
-      return res.data;
+      return res;
     },
   },
   subscriptions: {

@@ -11,7 +11,6 @@ import { useCallback, useState, useEffect, useMemo } from 'react';
 import { history, connect } from 'umi';
 import cx from './index.less';
 import { ReactComponent as WechatIcon } from '@/assets/svg/wechat-fill.svg';
-import { useForm, SubmitHandler } from 'react-hook-form';
 import {
   Box,
   Dialog,
@@ -21,14 +20,17 @@ import {
   Button,
   DialogActions,
   LinearProgress,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { TextField } from 'formik-mui';
-import request from '@/service/index';
 import { message } from 'antd';
 import type { UserType } from '@/typings/user';
 import { object, string, number, date, InferType } from 'yup';
 import { UserModelState, UserModelType } from '@/models/user';
+import { globalType } from '@/typings/global';
+import { useSnackbar, SnackbarProvider } from 'notistack';
 
 interface IFormInput {
   userName: String;
@@ -40,44 +42,65 @@ const userSchema = object({
   combination: string().required(),
 });
 
-const Nav: React.FC<{ userDvaState: UserModelState; dispatch: any }> = ({
-  userDvaState,
-  dispatch,
-}) => {
-  console.log(userDvaState);
+const Nav: React.FC<any> = ({ userDvaState, dispatch }) => {
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
   const { userInfo } = userDvaState;
 
   // 身份验证
   const [token, setToken] = useState('');
   // 是否更新token
   const [tokenNeedUpdate, setTokenNeedUpdate] = useState(true);
-  // 用户信息
-  // const [userInfo, setUserInfo] = useState<UserType.userProps>();
   // modal显示
   const [open, setOpen] = useState(false);
 
   const goWhere = useCallback((address: string): void => {
     history.push(address);
   }, []);
-  const goLogin = useCallback(() => {
-    setOpen(true);
-  }, []);
+
   // 关闭登录框
   const handleClose = useCallback(() => {
     setOpen(false);
   }, []);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+  const handleMenuClick = (event: MouseEvent) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = useCallback(() => {
+    setAnchorEl(null);
+    localStorage.removeItem('token');
+    setTokenNeedUpdate(true);
+    enqueueSnackbar('退出登录成功', {
+      variant: 'success',
+    });
+  }, []);
+
+  const hasLoginedtext = useMemo(() => {
+    return userInfo.userName
+      ? userInfo.userName
+      : JSON.parse(localStorage.getItem('info')!).userName;
+  }, [userInfo]);
 
   useEffect(() => {
     if (tokenNeedUpdate) {
       const mytoken = localStorage.getItem('token');
       if (mytoken) {
         setToken(mytoken);
+      } else {
+        setToken('');
+        localStorage.removeItem('userInfo');
       }
       setTokenNeedUpdate(false);
     }
   }, [tokenNeedUpdate]);
   return (
-    <>
+    <SnackbarProvider maxSnack={3}>
       <div className={cx.wrapper}>
         <div className={cx.left}>
           <span
@@ -91,17 +114,12 @@ const Nav: React.FC<{ userDvaState: UserModelState; dispatch: any }> = ({
         <ul className={cx.right}>
           <li>个人文章</li>
           <li>前端资源</li>
-          <li>留言板</li>
+          <li onClick={() => goWhere('/message')}>留言板</li>
           <li>诗词</li>
           <li onClick={() => goWhere('/album')}>音乐</li>
           <li>工具</li>
           {token ? (
-            <li>
-              欢迎你，{' '}
-              {userInfo.userName
-                ? userInfo.userName
-                : JSON.parse(sessionStorage.getItem('userInfo')!)['userName']}
-            </li>
+            <li onClick={handleMenuClick}>欢迎你，{hasLoginedtext}</li>
           ) : (
             <li className={cx.user}>
               <span onClick={() => setOpen(true)}>登录</span>
@@ -110,6 +128,19 @@ const Nav: React.FC<{ userDvaState: UserModelState; dispatch: any }> = ({
           )}
         </ul>
       </div>
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+        <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </Menu>
       <Dialog open={open} onClose={handleClose} className={cx.dialog1}>
         <DialogTitle>LogIn</DialogTitle>
         <Formik
@@ -123,15 +154,17 @@ const Nav: React.FC<{ userDvaState: UserModelState; dispatch: any }> = ({
               type: 'userDvaState/grabUserInfo',
               payload: values,
             }).then(
-              (res: UserModelState) => {
-                console.log(res);
-
+              (res: globalType.httpResponseType) => {
+                if (res.code !== 200) {
+                  setSubmitting(false);
+                  return message.error(res.message);
+                }
                 setSubmitting(false);
-                message.success('登陆成功');
+                enqueueSnackbar(res.message, { variant: 'success' });
                 setOpen(false);
                 setTokenNeedUpdate(true);
-                // 存入sessionStorage持久化用户信息
-                sessionStorage.setItem('userInfo', JSON.stringify(res));
+                // 持久化用户信息
+                localStorage.setItem('userInfo', JSON.stringify(res.data));
               },
               (err: any) => {
                 message.error(err);
@@ -171,7 +204,7 @@ const Nav: React.FC<{ userDvaState: UserModelState; dispatch: any }> = ({
           )}
         </Formik>
       </Dialog>
-    </>
+    </SnackbarProvider>
   );
 };
 
